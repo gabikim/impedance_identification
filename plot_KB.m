@@ -1,4 +1,4 @@
-function [valid] = plot_KB(W_trainRHF, W_trainRKF, RKFtorque_calc, RHFtorque_calc, percent_calc)
+function [valid] = plot_KB(W_trainRHF, W_trainRKF, RKFtorque_calc, RHFtorque_calc, percent_calc, count_step, currDate)
 %Plot K matrix values
 
     figure('Name', 'KB matrix values')
@@ -8,7 +8,7 @@ function [valid] = plot_KB(W_trainRHF, W_trainRKF, RKFtorque_calc, RHFtorque_cal
     plot(percent_calc, W_trainRHF(:,1))
     ylabel('RHF torque vs. K_h_h')
     legend('torque', 'parameter')
-    title('K values')
+    title(['K values for step No. ' num2str(count_step)])
     set(gca, 'XTickLabel', []);
     
     subplot(4,2,3)
@@ -37,7 +37,8 @@ function [valid] = plot_KB(W_trainRHF, W_trainRKF, RKFtorque_calc, RHFtorque_cal
     hold on
     plot(percent_calc, W_trainRHF(:,3))
     ylabel('RHF torque vs. B_h_h')
-    title('B values')
+    title(['B values for step No. ' num2str(count_step)])
+    legend('torque', 'parameter')
     set(gca, 'XTickLabel', []);
 
     subplot(4,2,4)
@@ -60,6 +61,9 @@ function [valid] = plot_KB(W_trainRHF, W_trainRKF, RKFtorque_calc, RHFtorque_cal
     plot(percent_calc, W_trainRKF(:,3))
     ylabel('RKF torque vs. B_k_h')
     xlabel('percent gait cycle')
+    
+    filepath_name = ['/' currDate '/KBmatrices_' num2str(count_step) '.fig'];
+    saveas(figure(count_step),[pwd filepath_name]);
     
     valid = 1;
 end

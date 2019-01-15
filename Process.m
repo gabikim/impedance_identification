@@ -67,9 +67,12 @@ sig = 1;
 RHF = 1;
 RKF = 2;
 Hacc = 0;
+KBmtx = NaN(windowSize, 9, num_pets);
 run('train.m')
 
 Hacc = 0;
 sig = 2;
 run('train.m')
+
+%% clear temp variables
 

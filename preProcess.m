@@ -1,4 +1,11 @@
-%%Load data from file
+%% make directory to save figures
+if plotTorqueCalc == 1 || plotData == 1 || plotKB == 1
+    currDate = strrep(datestr(datetime), ':', '_');
+    c = mkdir(currDate);
+    clear c;
+end
+
+%% Load data from file
 data_file = load(fileName);
 
 %% Set up data
@@ -46,17 +53,18 @@ if plotAccFilt == 1
         plot(linspace(0, 100, newSampleSize), smoothdata(accel_RKF(:,i),'movmean',10));
         ylabel('Acceleration RKF');
         set(gca, 'XTickLabel', []);
-        legend('Raw acceleration', 'Filtered acceleration')
+        %legend('Raw acceleration', 'Filtered acceleration')
 
         subplot(4,1,3);
         plot(linspace(0, 100, newSampleSize), jointVel_RHF(:,i));
-        ylabel('Joint Vel RKF');
+        ylabel('Joint Vel RHF');
+        set(gca, 'XTickLabel', []);
 
         subplot(4,1,4);
         plot(linspace(0, 100, newSampleSize), accel_RHF(:,i));
         hold on
         plot(linspace(0, 100, newSampleSize), smoothdata(accel_RHF(:,i),'movmean',10));
-        ylabel('Acceleration RKF');
+        ylabel('Acceleration RHF');
         xlabel('Percent gait cycle');
         legend('Raw acceleration', 'Filtered acceleration')
     end 
@@ -75,6 +83,7 @@ end
 %Col 5: Start Window 2, Col 6: End Window 2, Col 7: Closest step,Col 8: percent gait cycle of onset of perturbation
 %Col 9: percent gait cycle group: 0-9%, 10-19%, 20-29%, 30-39%, 40-49%, 50-59%, 60-69%, 70-79%, 80-89%, 90-99%
 perturb = build_perturb(stepCount, perturbSig_1, perturbSig_2, windowSize);
+corrCoeff_matrix = nan(stepCount,1);
 
 %We need to find the analogous portion of the gait cycle that matches the closest window 1 of the unperturbed step.
 %This is determined by finding the highest correlation coefficient
@@ -106,6 +115,7 @@ for i = 1:stepCount %for each perturbed step
         end
         [MaxCorr, MaxCorrIndex]= max(meanCorr(:,1)); %now see which step has the highest correlation coefficient
         perturb(i,7) = meanCorr(MaxCorrIndex,2); %put the closest step into perturbation array
+        corrCoeff_matrix(i, 1) = MaxCorr;
     end
 end
 
@@ -151,13 +161,18 @@ for i = 1:stepCount %for each perturbed step
         if plotShiftData == 1 && num_pets == 10 %% this is just plotting for the report
             da = 3;
             figure
+            subplot(2,1,1)
             plot(perturb_data_3d(:,20,num_pets), unshifted_unpet(:,da));
             hold on
             plot(perturb_data_3d(:,20,num_pets), curr_unpet(:,da+1));
             hold on
             plot(perturb_data_3d(:,20,num_pets), curr_pet(:,da+1));
             legend('unperturbed signal', 'shifted unperturbed signal', 'perturbed signal')
+            ylabel('RHF torque')
+            subplot(2,1,2)
+            plot(perturb_data_3d(:,20,num_pets), curr_pet(:,1))
             xlabel('percent gait cycle');
+            ylabel('perturb sig')
             title('Shifted unperturbed signals RHF torque')
         end
         

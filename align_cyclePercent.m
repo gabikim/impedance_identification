@@ -1,4 +1,4 @@
-function [percent_curr, torque_delt_curr, X_h_curr, torqueU_actual, torqueP_actual] = align_cyclePercent(newSampleSize, p_size, grouping_size_curr, percent_curr, torque_delt_curr, X_h_curr, torqueU_actual, torqueP_actual)
+function [percent_curr, torque_delt_curr, X_h_curr, torqueU_actual, torqueP_actual, Hacc_curr] = align_cyclePercent(newSampleSize, p_size, grouping_size_curr, percent_curr, torque_delt_curr, X_h_curr, torqueU_actual, torqueP_actual, Hacc_curr)
 %Shift the data so that the percentage gait cycles are aligned
 %find minimum and maximum percentage of sample 1, get the index
    %find minimum and maximum percentage of sample 1, get the index
@@ -10,6 +10,7 @@ function [percent_curr, torque_delt_curr, X_h_curr, torqueU_actual, torqueP_actu
     %Make arrays big enough to fit all samples by adding a NaN vector at
     %the end. Now can just shift data to the right
     torque_delt_curr = cat(3, torque_delt_curr, nan(2, grouping_size_curr, max_shift));
+    Hacc_curr = cat(3, Hacc_curr, nan(2, grouping_size_curr, max_shift));
     X_h_curr = cat(3, X_h_curr, nan(4, grouping_size_curr, max_shift));
     percent_curr = cat(3, percent_curr, nan(1, grouping_size_curr, max_shift));
     torqueU_actual = cat(3, torqueU_actual, nan(2, grouping_size_curr, max_shift));
@@ -18,9 +19,11 @@ function [percent_curr, torque_delt_curr, X_h_curr, torqueU_actual, torqueP_actu
     for j = 1:grouping_size_curr
         if j ~= minIndex
             shift_index = round(abs((percent_curr(1,j,1)- percent_curr(1, minIndex, 1))/percent_perSample));
-
+    
             torque_delt_curr(:, j, shift_index+1:shift_index+p_size) = torque_delt_curr(:, j, 1:p_size);
             torque_delt_curr(:, j, 1:shift_index) = nan(2,1,shift_index);
+            Hacc_curr(:, j, shift_index+1:shift_index+p_size) = Hacc_curr(:, j, 1:p_size);
+            Hacc_curr(:, j, 1:shift_index) = nan(2,1,shift_index);
             X_h_curr(:, j, shift_index+1:shift_index+p_size) = X_h_curr(:, j, 1:p_size);
             X_h_curr(:, j, 1:shift_index) = nan(4,1,shift_index);
             percent_curr(1, j, shift_index+1:shift_index+p_size) = percent_curr(1, j, 1:p_size);
